@@ -1,0 +1,215 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "Aspects mathématiques de l'ACP. Comme montré dans le cours, l'ACP correspond à une décomposition en valeurs principales de la matrice de correlation issue de la matrice observée. Nous allons le vérifier ici !\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(1)** Nous allons travailler avec une matrice de dimension 5x3. Elle corresponds a n=5 observations en dimension p=3\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[ 1.00408416 -0.27062814  0.24205131]\n",
+      " [ 1.20319454 -0.02233886  0.08104396]\n",
+      " [ 0.26137647  1.01346523  0.0701299 ]\n",
+      " [-0.00836446  0.949472   -0.29140672]\n",
+      " [ 0.90515795  0.3141844   1.11908354]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "\n",
+    "M=np.array([[1,0,0],[1,0,0],[0,1,0],[0,1,0],[1,0,1]])+np.random.randn(5,3)/5\n",
+    "\n",
+    "print(M)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(2)** Analyse des composantes principales et de la variance expliquee avec les outils scikit-learn\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Question 1 : \n",
+    "\n",
+    "Inspirez-vous de l'exercice 8 pour\n",
+    "- Centrer-réduire M\n",
+    "- Effectuer son ACP\n",
+    "- Visualiser les composantes principales et de la variance expliquée\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAY0AAAEKCAYAAADuEgmxAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADl0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uIDMuMC4yLCBodHRwOi8vbWF0cGxvdGxpYi5vcmcvOIA7rQAAETtJREFUeJzt3X+s3XV9x/Hna+WXy6airYL88PqjbOJvvBJ/LBtbbYawUJ0/AlkmLGiDG1nlv0YTXfxnuC3rcLqZKkQ0izp/V1tHKkggWUBuDb8ZpRA2mzZQYUPYmIh774/7LV5uz73nA73nfE8vz0dycr/n+/30nFe/3PTF98f5nFQVkiS1+JW+A0iSDh2WhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZof1HWCprVy5sqampvqOIUmHlB07dvykqlYNG7fsSmNqaoqZmZm+Y0jSISXJv7eM8/SUJKmZpSFJatZraSS5LMn9SW5dYPtpSR5KcmP3+Oi4M0qSfqnvaxqfBz4FfGGRMddW1R+MJ44kaTG9HmlU1TXAg31mkCS1OxSuabw5yU1JvpfkleN4w03bd47jbSTpkDPppfEj4MVV9Vrg74FvDRqUZH2SmSQz+/btO+g3veTKuw76NSRpOZro0qiqn1bVI93yNuDwJCsHjNtcVdNVNb1q1dDPpkiSnqa+L4QvKskxwH1VVUlOZbbkHhjFe23avvNJRxhTG7cCsGHNai5ae9Io3lKSDjm9lkaSLwGnASuT7AY+BhwOUFWfAd4NfDDJ48CjwNlVVaPIctHak54oh6mNW7n34jNH8TaSdEjrtTSq6pwh2z/F7C25kqQJMNHXNPqyYc3qviNI0kSyNAbwGoYkDWZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqVmvpZHksiT3J7l1ge1J8skku5LcnOSUcWeUJP1S30canwdOX2T724HV3WM98I9jyCRJWkCvpVFV1wAPLjJkHfCFmnUd8Nwkx44nnSRpvr6PNIY5DvjxnOe7u3WSpB5MemlkwLo6YFCyPslMkpl9+/aNIZYkPTNNemnsBk6Y8/x4YM/8QVW1uaqmq2p61apVYwsnSc80k14aW4D3dXdRvQl4qKr29h1Kkp6pDuvzzZN8CTgNWJlkN/Ax4HCAqvoMsA04A9gF/A/wJ/0klSRBz6VRVecM2V7An40pjiRpiEk/PSVJmiCWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZr2WRpLTk9yZZFeSjQO2n5dkX5Ibu8f7+8gpSZp1WF9vnGQF8GlgLbAbuCHJlqq6fd7Qr1TVhWMPKEk6QJ9HGqcCu6rqnqp6DPgysK7HPJKkIfosjeOAH895vrtbN9+7ktyc5GtJThhPNEnSIH2WRgasq3nPvwNMVdVrgO8Dlw98oWR9kpkkM/v27VvimJKk/fosjd3A3COH44E9cwdU1QNV9bPu6WeBNwx6oaraXFXTVTW9atWqkYSVJPVbGjcAq5O8JMkRwNnAlrkDkhw75+lZwB1jzCdJmqe3u6eq6vEkFwJXACuAy6rqtiQfB2aqagvw50nOAh4HHgTO6yuvJAlSNf8ywqFtenq6ZmZm+o4hSYeUJDuqanrYOD8RLklqZmlIkppZGpKkZpaGJKmZpSFp2du0fWffEZaNoaWR5NlJXjZg/WtGE0mSltYlV97Vd4RlY9HSSPJe4N+Arye5Lckb52z+/CiDSZImz7AP930YeENV7U1yKvDFJB+uqm8weO4oSZoIm7bvfNIRxtTGrQBsWLOai9ae1FesQ96w0lhRVXsBquqHSX4X+G6S4zlwckFJmhgXrT3piXKY2riVey8+s+dEy8OwaxoPz72e0RXIacx+78UrR5hLkjSBhh1pfJB5p6Gq6uEkpwPvHVkqSVpCG9as7jvCsjHsSOO/gRcOWP8m4LqljyNJS89rGEtnWGn8HfDwgPWPdtskSc8gw0pjqqpunr+yqmaAqZEkkiRNrGGlcdQi2561lEEkSZNvWGnckOQD81cmOR/YMZpIkqRJNezuqQ8B30zyR/yyJKaBI4B3jjKYJGnyLFoaVXUf8JbuQ32v6lZvraqrRp5MkjRxFi2NJEcBFwAvB24BLq2qx8cRTJI0eYZd07ic2dNRtwBvB/5m5IkkSRNr2DWNk6vq1QBJLgV+OPpIkqRJNexI4+f7FzwtJUkadqTx2iQ/7ZYDPKt7HqCq6tkjTSdJmijD7p5aMa4gkqTJ53eES5KaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkpr1WhpJTk9yZ5JdSTYO2H5kkq90269PMjX+lJKk/XorjSQrgE8zO+X6ycA5SU6eN+x84D+r6uXAJuAT400pSZqrzyONU4FdVXVPVT0GfBlYN2/MOma/0wPga8CaJBljRknSHH2WxnHAj+c8392tGzimm5r9IeD5Y0knSTpAn6Ux6IihnsYYkqxPMpNkZt++fUsSTpJ0oD5LYzdwwpznxwN7FhqT5DDgOcCD81+oqjZX1XRVTa9atWpEcSVJfZbGDcDqJC9JcgRwNrBl3pgtwLnd8ruBq6rqgCMNSdJ4DPvmvpGpqseTXAhcAawALquq25J8HJipqi3ApcAXk+xi9gjj7L7ySpJ6LA2AqtoGbJu37qNzlv8XeM+4c0mSBvMT4ZKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlkakqRmloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJy8Sm7TtH/h6WhiQtE5dcedfI38PSkCQ16/Wb+yRJB2fT9p1POsKY2rgVgA1rVnPR2pOW/P1SVUv+on2anp6umZmZvmNI0thNbdzKvRef+bT+bJIdVTU9bJynpyRJzSwNSVomNqxZPfL3sDQkaZkYxTWM+SwNSVIzS0OS1MzSkCQ1szQkSc0sDUlSM0tDktTM0pAkNbM0JEnNLA1JUjNLQ5LUzNKQJDXrpTSSPC/J9iR3dT+PXmDcL5Lc2D22jDunJOnJ+jrS2AhcWVWrgSu754M8WlWv6x5njS+eJGmQvkpjHXB5t3w58I6eckiSnoK+SuOFVbUXoPv5ggXGHZVkJsl1SSwWSerZyL4jPMn3gWMGbPrIU3iZE6tqT5KXAlcluaWq7h7wXuuB9QAnnnji08orSRpuZKVRVW9baFuS+5IcW1V7kxwL3L/Aa+zpft6T5Grg9cABpVFVm4HNMPsd4UsQX5I0QF+np7YA53bL5wLfnj8gydFJjuyWVwJvBW4fW0JJ0gH6Ko2LgbVJ7gLWds9JMp3kc92YVwAzSW4CfgBcXFWWhiT1aGSnpxZTVQ8AawasnwHe3y3/K/DqMUeTJC3CT4RLkppZGpKkZpaGJKmZpSFJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUiSmlka82zavrPvCJI0sSyNeS658q6+I0jSxLI0JEnNepmwcNJs2r7zSUcYUxu3ArBhzWouWntSX7EkaeKkanl9Z9H09HTNzMw87T8/tXEr91585hImkqTJl2RHVU0PG+fpKUlSM0tjng1rVvcdQZImlqUxj9cwJGlhloYkqZmlIUlqZmlIkppZGpKkZpaGJKmZpSFJamZpSJKaWRpLyGnVJS13lsYSclp1ScudpSFJaubU6AfJadUlPZM4NfoSclp1SYcqp0aXJC05S2MJOa26pOXO0lhCXsOQtNxZGpKkZr2URpL3JLktyf8lWfDCS5LTk9yZZFeSjePMKEk6UF9HGrcCfwhcs9CAJCuATwNvB04Gzkly8njiSZIG6eVzGlV1B0CSxYadCuyqqnu6sV8G1gG3jzygJGmgSb6mcRzw4znPd3frJEk9GdmRRpLvA8cM2PSRqvp2y0sMWDfwk4hJ1gPru6ePJLmzLeXYrQR+0neIp8jM42Hm8TDzwl7cMmhkpVFVbzvIl9gNnDDn+fHAngXeazOw+SDfb+SSzLR84nKSmHk8zDweZj54k3x66gZgdZKXJDkCOBvY0nMmSXpG6+uW23cm2Q28Gdia5Ipu/YuSbAOoqseBC4ErgDuAf66q2/rIK0ma1dfdU98Evjlg/R7gjDnPtwHbxhht1Cb+FNoAZh4PM4+HmQ/SspvlVpI0OpN8TUOSNGEsjRE6FKdLSfK8JNuT3NX9PHqBcb9IcmP36OUGhWH7LcmRSb7Sbb8+ydT4Ux6QaVjm85Lsm7Nv399Hzjl5Lktyf5JbF9ieJJ/s/j43Jzll3BkHZBqW+bQkD83Zxx8dd8YBmU5I8oMkd3T/ZmwYMGYy9nVV+RjRA3gF8BvA1cD0AmNWAHcDLwWOAG4CTu4x818BG7vljcAnFhj3SM/7duh+A/4U+Ey3fDbwlUMg83nAp/rMOS/PbwOnALcusP0M4HvMfq7qTcD1h0Dm04Dv9p1zXqZjgVO65V8Hdg743ZiIfe2RxghV1R1VNeyDhk9Ml1JVjwH7p0vpyzrg8m75cuAdPWZZTMt+m/t3+RqwJkPmrhmxSftvPVRVXQM8uMiQdcAXatZ1wHOTHDuedIM1ZJ44VbW3qn7ULT/M7B2j82fAmIh9bWn0b9KmS3lhVe2F2V9k4AULjDsqyUyS65L0USwt++2JMTV7C/dDwPPHkm6w1v/W7+pOP3wtyQkDtk+SSfv9bfXmJDcl+V6SV/YdZq7uNOrrgevnbZqIfd3LLbfLyTinS1kqi2V+Ci9zYlXtSfJS4Kokt1TV3UuTsEnLfhv7vh2iJc93gC9V1c+SXMDskdLvjTzZ0zdp+7jFj4AXV9UjSc4AvgVMxNduJvk14OvAh6rqp/M3D/gjY9/XlsZBqjFOl7JUFsuc5L4kx1bV3u7Q9/4FXmNP9/OeJFcz+39G4yyNlv22f8zuJIcBz6Hf0xZDM1fVA3Oefhb4xBhyHYyx//4erLn/GFfVtiT/kGRlVfU6J1WSw5ktjH+qqm8MGDIR+9rTU/2btOlStgDndsvnAgccLSU5OsmR3fJK4K2Mf8r6lv029+/ybuCq6q4o9mRo5nnnqM9i9tz2JNsCvK+7s+dNwEP7T29OqiTH7L+2leRUZv8dfGDxPzXyTAEuBe6oqr9dYNhk7Ou+7xpYzg/gncz+38HPgPuAK7r1LwK2zRl3BrN3S9zN7GmtPjM/H7gSuKv7+bxu/TTwuW75LcAtzN79cwtwfk9ZD9hvwMeBs7rlo4CvAruAHwIvnYDfiWGZ/xK4rdu3PwB+s+e8XwL2Aj/vfpfPBy4ALui2h9kvS7u7+10YeJfghGW+cM4+vg54ywRk/i1mTzXdDNzYPc6YxH3tJ8IlSc08PSVJamZpSJKaWRqSpGaWhiSpmaUhSWpmaUhLZM7Mv7cm+WqSX+3WH5Pky0nuTnJ7km1JTuq2/UuS/0ry3X7TS20sDWnpPFpVr6uqVwGPARd0H9r6JnB1Vb2sqk4GPgy8sPszfw38cT9xpafO0pBG41rg5cDvAj+vqs/s31BVN1bVtd3ylcDD/USUnjpLQ1pi3TxXb2f2U7uvAnb0m0haOpaGtHSeleRGYAb4D2bnEpKWFWe5lZbOo1X1urkrktzG7GSJ0rLgkYY0WlcBRyb5wP4VSd6Y5Hd6zCQ9bZaGNEI1OyPoO4G13S23twF/Qfc9CEmuZXYm3jVJdif5/d7CSg2c5VaS1MwjDUlSM0tDktTM0pAkNbM0JEnNLA1JUjNLQ5LUzNKQJDWzNCRJzf4fsVxIOo/T1PgAAAAASUVORK5CYII=\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "M = StandardScaler().fit_transform(M)\n",
+    "\n",
+    "from sklearn.decomposition import PCA\n",
+    "pca = PCA()\n",
+    "pca.fit_transform(M)\n",
+    "\n",
+    "ProjData=np.dot(M,pca.components_.transpose())\n",
+    "plt.plot(ProjData[:,0],ProjData[:,1],'+')\n",
+    "plt.xlabel('PC1')\n",
+    "plt.ylabel('PC2')\n",
+    "plt.show()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "pca.explained_variance_ :\n",
+      "[2.76481268 0.906793   0.07839433]\n",
+      "pca.components_ : \n",
+      "[[-0.65141483 -0.19545637  0.73311358]\n",
+      " [ 0.61630538  0.4272488   0.66153318]\n",
+      " [-0.44252277  0.88275437 -0.15785539]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('pca.explained_variance_ :')\n",
+    "print(pca.explained_variance_)\n",
+    "print('pca.components_ : ')\n",
+    "print(pca.components_.transpose())\n",
+    "  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**(3)** Comme nous l'avons vu dans le cours, l'ACP est une diagonalisation de la matrice de covariance. \n",
+    "On va vérifier ici que les composantes et la variance expliquée issues de l'ACP de M sont similaires aux informations renvoyées trouvées en calculant la décomposition en valeur principales de la matrice de covariance de M. \n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "## Question 2 : \n",
+    "résolvez le problème en calculant\n",
+    "- La matrice de covariance des observations dans M\n",
+    "- Utilisez np.linalg.eig pour décomposer la matrice de covariance\n",
+    "- Mettez en lien les résultats avec pca.explained_variance_ et pca.components_\n",
+    "\n",
+    "Remarque : il y a un léger bug dans la pca de sklearn. La matrice de covariance qu'elle considère est normalisée avec 'n' et non 'n-1'\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "eigen values :\n",
+      "[2.21185014 0.06271546 0.7254344 ]\n",
+      "eigen vectors : \n",
+      "[[-0.65141483  0.73311358 -0.19545637]\n",
+      " [ 0.61630538  0.66153318  0.4272488 ]\n",
+      " [-0.44252277 -0.15785539  0.88275437]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "n=M.shape[0]\n",
+    "\n",
+    "covMat=np.dot(M.transpose(),M)/(n)  #calcul de la matrice de covariance : attention, pour obtenir les memes résultats qu'avec l'ACP, il faut diviser np.dot(...) par 'n' et non 'n-1'. Il y a sans doute un petit bug dans scikit-learn. Remarquons que ce n'est pas le cas sous R.\n",
+    "\n",
+    "[eigVal,eigVec]=np.linalg.eig(covMat)\n",
+    "\n",
+    "print('eigen values :')\n",
+    "print(eigVal)\n",
+    "print('eigen vectors : ')\n",
+    "print(eigVec)\n",
+    "\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
